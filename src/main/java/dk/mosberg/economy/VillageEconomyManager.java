@@ -6,6 +6,7 @@ import dk.mosberg.config.EconomyConfig;
 import dk.mosberg.config.RotVConfigManager;
 import dk.mosberg.village.VillagePersistentState;
 import dk.mosberg.village.VillageProfile;
+import dk.mosberg.village.VillageSpecialization;
 import dk.mosberg.villager.RotVVillagerDataUtil;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -21,10 +22,15 @@ public final class VillageEconomyManager {
         float dayScale = aiConfig.villageScanIntervalTicks <= 0 ? 0.0f
                 : aiConfig.villageScanIntervalTicks / 24000.0f;
 
-        int consumption = Math.round(population * config.foodPerVillagerPerDay * dayScale);
-        int foodProduction = Math.round(workstations * config.foodPerWorkstationPerDay * dayScale);
+        SpecializationModifiers modifiers = resolveModifiers(profile.getSpecialization(), config);
+
+        int consumption = Math.round((float) (population * config.foodPerVillagerPerDay * dayScale
+                * modifiers.foodConsumptionMultiplier));
+        int foodProduction = Math.round((float) (workstations * config.foodPerWorkstationPerDay
+                * dayScale * modifiers.foodProductionMultiplier));
         int materialProduction =
-                Math.round(workstations * config.materialsPerWorkstationPerDay * dayScale);
+                Math.round((float) (workstations * config.materialsPerWorkstationPerDay * dayScale
+                        * modifiers.materialProductionMultiplier));
 
         profile.setFood(Math.max(0, profile.getFood() + foodProduction - consumption));
         profile.setMaterials(Math.max(0, profile.getMaterials() + materialProduction));
@@ -38,8 +44,34 @@ public final class VillageEconomyManager {
         String id = world.getRegistryKey().getValue() + "@" + anchor.toShortString();
         VillagePersistentState state = VillagePersistentState.get(world);
         VillageProfile profile = state.getOrCreate(id, anchor);
-        profile.setWealth(
-                profile.getWealth() + trades * RotVConfigManager.get().economy.wealthPerTrade);
+        SpecializationModifiers modifiers =
+                resolveModifiers(profile.getSpecialization(), RotVConfigManager.get().economy);
+        int gain = Math.round((float) (trades * RotVConfigManager.get().economy.wealthPerTrade
+                * modifiers.wealthMultiplier));
+        profile.setWealth(profile.getWealth() + gain);
         state.markDirty();
+    }
+
+    private static SpecializationModifiers resolveModifiers(VillageSpecialization specialization,
+            EconomyConfig config) {
+        return switch (specialization) {
+            case AGRICULTURAL -> new SpecializationModifiers(config.agriculturalFoodMultiplier,
+                    RotVConfigManager.get().progression.agriculturalFoodConsumptionPenalty, 1.0,
+                    1.0);
+            case MINING -> new SpecializationModifiers(1.0, 1.0, config.miningMaterialsMultiplier,
+                    1.0);
+            case MERCHANT -> new SpecializationModifiers(1.0, 1.0, 1.0,
+                    config.merchantWealthMultiplier);
+            case ARCANE -> new SpecializationModifiers(1.0, 1.0, 1.0,
+                    config.arcaneWealthMultiplier);
+            case MILITARIZED -> new SpecializationModifiers(1.0, config.militarizedFoodPenalty, 1.0,
+                    1.0);
+            case NONE -> new SpecializationModifiers(1.0, 1.0, 1.0, 1.0);
+        };
+    }
+
+    private record SpecializationModifiers(double foodProductionMultiplier,
+            double foodConsumptionMultiplier, double materialProductionMultiplier,
+            double wealthMultiplier) {
     }
 }

@@ -73,6 +73,46 @@ public final class RotVConfigScreen {
                 .startIntField(Text.literal("Capital min population"),
                         config.progression.capitalMinPopulation)
                 .setSaveConsumer(value -> config.progression.capitalMinPopulation = value).build());
+        progression.addEntry(entryBuilder
+                .startIntField(Text.literal("Specialization min population"),
+                        config.progression.specializationMinPopulation)
+                .setSaveConsumer(value -> config.progression.specializationMinPopulation = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startIntField(Text.literal("Specialization min profession count"),
+                        config.progression.specializationMinProfessionCount)
+                .setSaveConsumer(
+                        value -> config.progression.specializationMinProfessionCount = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Agricultural happiness bonus"),
+                        config.progression.agriculturalHappinessBonus)
+                .setSaveConsumer(value -> config.progression.agriculturalHappinessBonus = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Merchant happiness bonus"),
+                        config.progression.merchantHappinessBonus)
+                .setSaveConsumer(value -> config.progression.merchantHappinessBonus = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Arcane happiness bonus"),
+                        config.progression.arcaneHappinessBonus)
+                .setSaveConsumer(value -> config.progression.arcaneHappinessBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Mining security bonus"),
+                        config.progression.miningSecurityBonus)
+                .setSaveConsumer(value -> config.progression.miningSecurityBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Militarized security bonus"),
+                        config.progression.militarizedSecurityBonus)
+                .setSaveConsumer(value -> config.progression.militarizedSecurityBonus = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Agricultural food consumption penalty"),
+                        config.progression.agriculturalFoodConsumptionPenalty)
+                .setSaveConsumer(
+                        value -> config.progression.agriculturalFoodConsumptionPenalty = value)
+                .build());
 
         ConfigCategory ai = builder.getOrCreateCategory(Text.literal("AI"));
         ai.addEntry(entryBuilder
@@ -116,6 +156,20 @@ public final class RotVConfigScreen {
                 .startIntField(Text.literal("Work XP interval (ticks)"),
                         config.professions.workXpIntervalTicks)
                 .setSaveConsumer(value -> config.professions.workXpIntervalTicks = value).build());
+        professions.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Arcane XP multiplier"),
+                        config.professions.arcaneXpMultiplier)
+                .setSaveConsumer(value -> config.professions.arcaneXpMultiplier = value).build());
+        professions.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Militarized guard armor bonus"),
+                        config.professions.militarizedGuardArmorBonus)
+                .setSaveConsumer(value -> config.professions.militarizedGuardArmorBonus = value)
+                .build());
+        professions.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Merchant trade XP multiplier"),
+                        config.professions.merchantTradeXpMultiplier)
+                .setSaveConsumer(value -> config.professions.merchantTradeXpMultiplier = value)
+                .build());
 
         professions.addEntry(entryBuilder
                 .startIntField(Text.literal("Hunter speed level 1"),
@@ -215,6 +269,28 @@ public final class RotVConfigScreen {
         economy.addEntry(entryBuilder
                 .startIntField(Text.literal("Wealth per trade"), config.economy.wealthPerTrade)
                 .setSaveConsumer(value -> config.economy.wealthPerTrade = value).build());
+        economy.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Agricultural food multiplier"),
+                        config.economy.agriculturalFoodMultiplier)
+                .setSaveConsumer(value -> config.economy.agriculturalFoodMultiplier = value)
+                .build());
+        economy.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Mining materials multiplier"),
+                        config.economy.miningMaterialsMultiplier)
+                .setSaveConsumer(value -> config.economy.miningMaterialsMultiplier = value)
+                .build());
+        economy.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Merchant wealth multiplier"),
+                        config.economy.merchantWealthMultiplier)
+                .setSaveConsumer(value -> config.economy.merchantWealthMultiplier = value).build());
+        economy.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Arcane wealth multiplier"),
+                        config.economy.arcaneWealthMultiplier)
+                .setSaveConsumer(value -> config.economy.arcaneWealthMultiplier = value).build());
+        economy.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Militarized food multiplier"),
+                        config.economy.militarizedFoodPenalty)
+                .setSaveConsumer(value -> config.economy.militarizedFoodPenalty = value).build());
 
         ConfigCategory names = builder.getOrCreateCategory(Text.literal("Names"));
         names.addEntry(entryBuilder
@@ -227,6 +303,9 @@ public final class RotVConfigScreen {
                 .startBooleanToggle(Text.literal("Override custom names"),
                         config.names.allowOverrideCustomName)
                 .setSaveConsumer(value -> config.names.allowOverrideCustomName = value).build());
+        names.addEntry(entryBuilder
+                .startBooleanToggle(Text.literal("Show HUD tooltip"), config.names.showHudTooltip)
+                .setSaveConsumer(value -> config.names.showHudTooltip = value).build());
 
         return builder.build();
     }

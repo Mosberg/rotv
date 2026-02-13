@@ -42,6 +42,11 @@ public final class RotVVillagerDataUtil {
         applyDisplayName(villager, data);
     }
 
+    public static void refreshDisplayName(VillagerEntity villager) {
+        RotVVillagerData data = getData(villager);
+        applyDisplayName(villager, data);
+    }
+
     private static void applyDisplayName(VillagerEntity villager, RotVVillagerData data) {
         if (!RotVConfigManager.get().names.enableFullNames) {
             return;

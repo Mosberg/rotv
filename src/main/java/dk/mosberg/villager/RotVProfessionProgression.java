@@ -3,16 +3,23 @@ package dk.mosberg.villager;
 import dk.mosberg.config.ProfessionConfig;
 import dk.mosberg.config.RotVConfig;
 import dk.mosberg.config.RotVConfigManager;
+import dk.mosberg.village.VillagePersistentState;
+import dk.mosberg.village.VillageProfile;
+import dk.mosberg.village.VillageSpecialization;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 
 public final class RotVProfessionProgression {
     private static final Identifier HUNTER_SPEED_ID = Identifier.of("rotv", "hunter_speed");
     private static final Identifier ENGINEER_HEALTH_ID = Identifier.of("rotv", "engineer_health");
     private static final Identifier GUARD_ARMOR_ID = Identifier.of("rotv", "guard_armor");
+    private static final Identifier MILITARIZED_GUARD_ARMOR_ID =
+            Identifier.of("rotv", "militarized_guard_armor");
     private static final Identifier MAGE_RANGE_ID = Identifier.of("rotv", "mage_range");
     private static final Identifier CARAVAN_SPEED_ID = Identifier.of("rotv", "caravan_speed");
     private static final Identifier ARCHITECT_SPEED_ID = Identifier.of("rotv", "architect_speed");
@@ -73,6 +80,15 @@ public final class RotVProfessionProgression {
                 perkConfig.guardArmorLevel2, perkConfig.guardArmorBonus2);
         applyModifier(armor, GUARD_ARMOR_ID, "rotv_guard_armor", guardArmor,
                 EntityAttributeModifier.Operation.ADD_VALUE);
+        double militarizedBonus = 0.0;
+        if (profession == RotVProfession.GUARD && config.modules.villageProgression) {
+            VillageSpecialization specialization = resolveVillageSpecialization(villager);
+            if (specialization == VillageSpecialization.MILITARIZED) {
+                militarizedBonus = Math.max(0.0, perkConfig.militarizedGuardArmorBonus);
+            }
+        }
+        applyModifier(armor, MILITARIZED_GUARD_ARMOR_ID, "rotv_militarized_guard_armor",
+                militarizedBonus, EntityAttributeModifier.Operation.ADD_VALUE);
 
         EntityAttributeInstance range =
                 villager.getAttributeInstance(EntityAttributes.FOLLOW_RANGE);
@@ -156,6 +172,11 @@ public final class RotVProfessionProgression {
             return;
         }
 
+        if (config.modules.villageProgression) {
+            VillageSpecialization specialization = resolveVillageSpecialization(villager);
+            amount = applySpecializationXpBonus(amount, specialization, villager, config);
+        }
+
         RotVVillagerProfessionData data = RotVVillagerDataUtil.getData(villager).getProfession();
         ProfessionConfig professionConfig = config.professions;
         int maxLevel = Math.max(1, professionConfig.maxLevel);
@@ -174,5 +195,36 @@ public final class RotVProfessionProgression {
 
         data.setLevel(level);
         data.setXp(xp);
+    }
+
+    private static VillageSpecialization resolveVillageSpecialization(VillagerEntity villager) {
+        if (!(villager.getEntityWorld() instanceof ServerWorld serverWorld)) {
+            return VillageSpecialization.NONE;
+        }
+        BlockPos anchor = RotVVillagerDataUtil.resolveVillageAnchor(villager);
+        String id = serverWorld.getRegistryKey().getValue() + "@" + anchor.toShortString();
+        VillageProfile profile = VillagePersistentState.get(serverWorld).getOrCreate(id, anchor);
+        return profile.getSpecialization();
+    }
+
+    private static int applySpecializationXpBonus(int amount, VillageSpecialization specialization,
+            VillagerEntity villager, RotVConfig config) {
+        ProfessionConfig profConfig = config.professions;
+        return switch (specialization) {
+            case ARCANE -> Math
+                    .round(amount * (float) Math.max(0.0, profConfig.arcaneXpMultiplier));
+            case MERCHANT -> {
+                RotVProfession profession =
+                        RotVVillagerDataUtil.getData(villager).getProfession().getProfession();
+                if (profession == RotVProfession.CARAVAN_LEADER
+                        || profession == RotVProfession.DIPLOMAT) {
+                    yield Math.round(
+                            amount * (float) Math.max(0.0, profConfig.merchantTradeXpMultiplier));
+                } else {
+                    yield amount;
+                }
+            }
+            default -> amount;
+        };
     }
 }

@@ -10,6 +10,9 @@ public class ProfessionConfig {
     public boolean enableTradeXp = true;
     public boolean enableWorkXp = true;
     public boolean enableCombatXp = true;
+    public double arcaneXpMultiplier = 1.2;
+    public double militarizedGuardArmorBonus = 2.0;
+    public double merchantTradeXpMultiplier = 1.15;
 
     public int hunterSpeedLevel1 = 3;
     public double hunterSpeedBonus1 = 0.04;
