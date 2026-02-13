@@ -19,6 +19,7 @@ public class RotVVillagerData {
     private RotVVillagerProfessionData profession = new RotVVillagerProfessionData();
     private BlockPos homePos;
     private BlockPos jobSitePos;
+    private long lastBreedTime;
 
     public void readFromNbt(NbtCompound nbt) {
         nbt.getCompound(ROOT_KEY).ifPresent(rotv -> {
@@ -44,6 +45,7 @@ public class RotVVillagerData {
             rotv.getCompound("Profession").ifPresent(profession::readFromNbt);
             rotv.getCompound("HomePos").ifPresent(tag -> homePos = readBlockPos(tag));
             rotv.getCompound("JobSitePos").ifPresent(tag -> jobSitePos = readBlockPos(tag));
+            lastBreedTime = rotv.getLong("LastBreedTime").orElse(0L);
         });
     }
 
@@ -79,6 +81,7 @@ public class RotVVillagerData {
         if (jobSitePos != null) {
             rotv.put("JobSitePos", writeBlockPos(jobSitePos));
         }
+        rotv.putLong("LastBreedTime", lastBreedTime);
         nbt.put(ROOT_KEY, rotv);
     }
 
@@ -189,5 +192,13 @@ public class RotVVillagerData {
 
     public void setJobSitePos(BlockPos jobSitePos) {
         this.jobSitePos = jobSitePos;
+    }
+
+    public long getLastBreedTime() {
+        return lastBreedTime;
+    }
+
+    public void setLastBreedTime(long lastBreedTime) {
+        this.lastBreedTime = lastBreedTime;
     }
 }

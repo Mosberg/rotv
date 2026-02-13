@@ -76,10 +76,13 @@ public final class VillageProfileManager {
         float baseHappiness = Math.min(1.0f, profile.getPopulation() / 20.0f);
         float baseSecurity = Math.min(1.0f, profile.getPopulation() / 30.0f);
         VillageSpecialization specialization = profile.getSpecialization();
+        TierModifiers tierMods = resolveTierModifiers(profile.getTier(), config.progression);
         float happiness =
-                clamp01(baseHappiness + resolveHappinessBonus(specialization, config.progression));
+                clamp01(baseHappiness + resolveHappinessBonus(specialization, config.progression)
+                        + (float) tierMods.happinessBonus());
         float security =
-                clamp01(baseSecurity + resolveSecurityBonus(specialization, config.progression));
+                clamp01(baseSecurity + resolveSecurityBonus(specialization, config.progression)
+                        + (float) tierMods.securityBonus());
         profile.setHappiness(happiness);
         profile.setSecurity(security);
         VillageEconomyManager.updateProfile(profile, members, config.economy, config.ai);
@@ -164,5 +167,23 @@ public final class VillageProfileManager {
             return 1.0f;
         }
         return value;
+    }
+
+    public static TierModifiers resolveTierModifiers(VillageTier tier, ProgressionConfig config) {
+        return switch (tier) {
+            case HAMLET -> new TierModifiers(1.0, 0.0, 0.0);
+            case VILLAGE -> new TierModifiers(config.villageProductionMultiplier,
+                    config.villageHappinessBonus, config.villageSecurityBonus);
+            case TOWN -> new TierModifiers(config.townProductionMultiplier,
+                    config.townHappinessBonus, config.townSecurityBonus);
+            case CITY -> new TierModifiers(config.cityProductionMultiplier,
+                    config.cityHappinessBonus, config.citySecurityBonus);
+            case CAPITAL -> new TierModifiers(config.capitalProductionMultiplier,
+                    config.capitalHappinessBonus, config.capitalSecurityBonus);
+        };
+    }
+
+    public record TierModifiers(double productionMultiplier, double happinessBonus,
+            double securityBonus) {
     }
 }

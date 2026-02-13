@@ -31,14 +31,24 @@
 ## Village Progression
 
 - Village profile tracking (population, beds, workstations, tier, happiness, security).
-- Tier resolution from population thresholds.
+- Tier resolution from population thresholds (HAMLET → VILLAGE → TOWN → CITY → CAPITAL).
 - Automatic village specialization based on dominant profession mix.
+- Tier-based bonuses: each tier grants production efficiency, happiness, and security bonuses:
+  - HAMLET: baseline (no bonuses)
+  - VILLAGE: +5% production, +3% happiness, +2% security
+  - TOWN: +10% production, +6% happiness, +4% security
+  - CITY: +15% production, +9% happiness, +6% security
+  - CAPITAL: +20% production, +12% happiness, +8% security
 - Specialization-based village-wide modifiers:
   - AGRICULTURAL: +25% food production, -5% food consumption
   - MINING: +25% materials, +4% security
   - MERCHANT: +25% wealth gain
   - ARCANE: +10% wealth gain
-  - MILITARIZED: -10% food consumption, +8% security (penalty/bonus trade-off)
+  - MILITARIZED: -10% food consumption, +8% security (penalty/bonus trade-off)- Villager breeding system:
+  - Villagers breed if village has sufficient food, beds, and happiness above 60%
+  - 5-minute breeding cooldown per villager (configurable)
+  - Consuming 2 food per breeding event (configurable)
+  - Baby villagers spawn new with personality and family names
 
 ## Economy
 

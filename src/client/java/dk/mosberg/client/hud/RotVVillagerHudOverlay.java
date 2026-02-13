@@ -10,13 +10,15 @@ import dk.mosberg.villager.RotVProfession;
 import dk.mosberg.villager.RotVProfessionProgression;
 import dk.mosberg.villager.RotVVillagerData;
 import dk.mosberg.villager.RotVVillagerDataUtil;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 
@@ -24,10 +26,11 @@ public final class RotVVillagerHudOverlay {
     private RotVVillagerHudOverlay() {}
 
     public static void init() {
-        HudRenderCallback.EVENT.register((context, tickCounter) -> render(context));
+        HudElementRegistry.addLast(Identifier.of("rotv", "villager_overlay"),
+                RotVVillagerHudOverlay::render);
     }
 
-    private static void render(DrawContext context) {
+    private static void render(DrawContext context, RenderTickCounter tickCounter) {
         if (!RotVConfigManager.get().names.showHudTooltip) {
             return;
         }
@@ -41,13 +44,11 @@ public final class RotVVillagerHudOverlay {
         if (!(hit.getEntity() instanceof VillagerEntity villager)) {
             return;
         }
-
         RotVVillagerDataUtil.ensureInitialized(villager);
         RotVVillagerData data = RotVVillagerDataUtil.getData(villager);
         RotVProfessionProgression.syncProfession(villager);
         RotVProfession profession = data.getProfession().getProfession();
         VillageSpecialization specialization = resolveVillageSpecialization(villager);
-
         List<Text> lines = new ArrayList<>();
         String first = data.getFirstName();
         String last = data.getLastName();
@@ -58,15 +59,13 @@ public final class RotVVillagerHudOverlay {
         if (data.getProfession().getLevel() > 0) {
             lines.add(Text.literal("Level: " + data.getProfession().getLevel()));
         }
-
         if (specialization != VillageSpecialization.NONE) {
-            lines.add(Text.literal("")); // Blank line for spacing
+            lines.add(Text.literal(""));
             String perkText = buildSpecializationPerkInfo(profession, specialization);
             if (!perkText.isEmpty()) {
-                lines.add(Text.literal("§6" + perkText)); // Gold color
+                lines.add(Text.literal("§6" + perkText));
             }
         }
-
         TextRenderer renderer = client.textRenderer;
         int x = client.getWindow().getScaledWidth() / 2 + 8;
         int y = client.getWindow().getScaledHeight() / 2 + 8;

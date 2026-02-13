@@ -114,6 +114,83 @@ public final class RotVConfigScreen {
                         value -> config.progression.agriculturalFoodConsumptionPenalty = value)
                 .build());
 
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Village production multiplier"),
+                        config.progression.villageProductionMultiplier)
+                .setSaveConsumer(value -> config.progression.villageProductionMultiplier = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Village happiness bonus"),
+                        config.progression.villageHappinessBonus)
+                .setSaveConsumer(value -> config.progression.villageHappinessBonus = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Village security bonus"),
+                        config.progression.villageSecurityBonus)
+                .setSaveConsumer(value -> config.progression.villageSecurityBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Town production multiplier"),
+                        config.progression.townProductionMultiplier)
+                .setSaveConsumer(value -> config.progression.townProductionMultiplier = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Town happiness bonus"),
+                        config.progression.townHappinessBonus)
+                .setSaveConsumer(value -> config.progression.townHappinessBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Town security bonus"),
+                        config.progression.townSecurityBonus)
+                .setSaveConsumer(value -> config.progression.townSecurityBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("City production multiplier"),
+                        config.progression.cityProductionMultiplier)
+                .setSaveConsumer(value -> config.progression.cityProductionMultiplier = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("City happiness bonus"),
+                        config.progression.cityHappinessBonus)
+                .setSaveConsumer(value -> config.progression.cityHappinessBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("City security bonus"),
+                        config.progression.citySecurityBonus)
+                .setSaveConsumer(value -> config.progression.citySecurityBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Capital production multiplier"),
+                        config.progression.capitalProductionMultiplier)
+                .setSaveConsumer(value -> config.progression.capitalProductionMultiplier = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Capital happiness bonus"),
+                        config.progression.capitalHappinessBonus)
+                .setSaveConsumer(value -> config.progression.capitalHappinessBonus = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Capital security bonus"),
+                        config.progression.capitalSecurityBonus)
+                .setSaveConsumer(value -> config.progression.capitalSecurityBonus = value).build());
+        progression.addEntry(entryBuilder
+                .startBooleanToggle(Text.literal("Enable breeding"),
+                        config.progression.enableBreeding)
+                .setSaveConsumer(value -> config.progression.enableBreeding = value).build());
+        progression.addEntry(entryBuilder
+                .startIntField(Text.literal("Breeding cooldown (ticks)"),
+                        config.progression.breedingCooldownTicks)
+                .setSaveConsumer(value -> config.progression.breedingCooldownTicks = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startIntField(Text.literal("Breeding food cost"),
+                        config.progression.breedingFoodCost)
+                .setSaveConsumer(value -> config.progression.breedingFoodCost = value).build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Breeding happiness threshold"),
+                        config.progression.breedingHappinessThreshold)
+                .setSaveConsumer(value -> config.progression.breedingHappinessThreshold = value)
+                .build());
+        progression.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Breeding bed ratio (beds per villager)"),
+                        config.progression.breedingBedRatio)
+                .setSaveConsumer(value -> config.progression.breedingBedRatio = value).build());
+
         ConfigCategory ai = builder.getOrCreateCategory(Text.literal("AI"));
         ai.addEntry(entryBuilder
                 .startIntField(Text.literal("Village scan interval (ticks)"),

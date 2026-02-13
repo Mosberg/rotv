@@ -6,6 +6,8 @@ import dk.mosberg.config.EconomyConfig;
 import dk.mosberg.config.RotVConfigManager;
 import dk.mosberg.village.VillagePersistentState;
 import dk.mosberg.village.VillageProfile;
+import dk.mosberg.village.VillageProfileManager;
+import dk.mosberg.village.VillageProfileManager.TierModifiers;
 import dk.mosberg.village.VillageSpecialization;
 import dk.mosberg.villager.RotVVillagerDataUtil;
 import net.minecraft.entity.passive.VillagerEntity;
@@ -22,15 +24,18 @@ public final class VillageEconomyManager {
         float dayScale = aiConfig.villageScanIntervalTicks <= 0 ? 0.0f
                 : aiConfig.villageScanIntervalTicks / 24000.0f;
 
-        SpecializationModifiers modifiers = resolveModifiers(profile.getSpecialization(), config);
+        SpecializationModifiers specMods = resolveModifiers(profile.getSpecialization(), config);
+        TierModifiers tierMods = VillageProfileManager.resolveTierModifiers(profile.getTier(),
+                RotVConfigManager.get().progression);
+        double tierProdMultiplier = tierMods.productionMultiplier();
 
         int consumption = Math.round((float) (population * config.foodPerVillagerPerDay * dayScale
-                * modifiers.foodConsumptionMultiplier));
+                * specMods.foodConsumptionMultiplier));
         int foodProduction = Math.round((float) (workstations * config.foodPerWorkstationPerDay
-                * dayScale * modifiers.foodProductionMultiplier));
+                * dayScale * specMods.foodProductionMultiplier * tierProdMultiplier));
         int materialProduction =
                 Math.round((float) (workstations * config.materialsPerWorkstationPerDay * dayScale
-                        * modifiers.materialProductionMultiplier));
+                        * specMods.materialProductionMultiplier * tierProdMultiplier));
 
         profile.setFood(Math.max(0, profile.getFood() + foodProduction - consumption));
         profile.setMaterials(Math.max(0, profile.getMaterials() + materialProduction));
@@ -44,10 +49,12 @@ public final class VillageEconomyManager {
         String id = world.getRegistryKey().getValue() + "@" + anchor.toShortString();
         VillagePersistentState state = VillagePersistentState.get(world);
         VillageProfile profile = state.getOrCreate(id, anchor);
-        SpecializationModifiers modifiers =
+        SpecializationModifiers specMods =
                 resolveModifiers(profile.getSpecialization(), RotVConfigManager.get().economy);
+        TierModifiers tierMods = VillageProfileManager.resolveTierModifiers(profile.getTier(),
+                RotVConfigManager.get().progression);
         int gain = Math.round((float) (trades * RotVConfigManager.get().economy.wealthPerTrade
-                * modifiers.wealthMultiplier));
+                * specMods.wealthMultiplier * tierMods.productionMultiplier()));
         profile.setWealth(profile.getWealth() + gain);
         state.markDirty();
     }

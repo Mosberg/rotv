@@ -1,5 +1,6 @@
 package dk.mosberg.server;
 
+import dk.mosberg.breeding.VillagerBreedingManager;
 import dk.mosberg.config.RotVConfig;
 import dk.mosberg.config.RotVConfigManager;
 import dk.mosberg.village.VillageProfileManager;
@@ -21,17 +22,20 @@ public final class RotVServerHooks {
         if (!config.modules.villageProgression) {
             return;
         }
-        if (config.ai.villageScanIntervalTicks <= 0) {
-            return;
-        }
 
         long time = server.getOverworld().getTime();
-        if (time % config.ai.villageScanIntervalTicks != 0L) {
-            return;
+
+        if (config.ai.villageScanIntervalTicks > 0
+                && time % config.ai.villageScanIntervalTicks == 0L) {
+            for (ServerWorld world : server.getWorlds()) {
+                VillageProfileManager.tick(world, config);
+            }
         }
 
-        for (ServerWorld world : server.getWorlds()) {
-            VillageProfileManager.tick(world, config);
+        if (config.progression.enableBreeding) {
+            for (ServerWorld world : server.getWorlds()) {
+                VillagerBreedingManager.tick(world, config);
+            }
         }
     }
 }
