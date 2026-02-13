@@ -33,4 +33,20 @@ public class ProgressionConfig {
     public int breedingFoodCost = 2;
     public double breedingHappinessThreshold = 0.6;
     public double breedingBedRatio = 1.1;
+
+    // Guard and Defense Config
+    public boolean enableRaids = true;
+    public double raidSpawnChanceFactor = 0.01;
+    public int minRaidersPerRaid = 2;
+    public int maxRaidersPerRaid = 8;
+    public int raiderHealthBase = 20;
+    public double raiderDamageBase = 1.5;
+    public double raiderDifficultyPerTier = 0.2;
+    public int raidCooldownTicksHamlet = 72000;
+    public int raidCooldownTicksVillage = 60000;
+    public int raidCooldownTownAndAbove = 48000;
+    public double militarizedGuardArmorBonus = 2.0;
+    public double guardDamageReduction = 0.15;
+    public double postRaidHappinessPenalty = 0.15;
+    public int guardMinimumPopulationThreshold = 8;
 }

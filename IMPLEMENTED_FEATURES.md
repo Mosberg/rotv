@@ -66,3 +66,19 @@
 
 - /rotv villager info, setname, setfamily, setprofession, setlevel, setxp.
 - /rotv village info, addwealth, addfood, addmaterials.
+
+## Defense and Raids (Phase 4)
+
+- Guard team management per village with dynamic guard assignment based on population and tier
+- Raid spawning system tied to village prominence (population + tier + specialization)
+- Pillager raider spawning with difficulty scaling based on raid difficulty modifier
+- Configurable raid parameters:
+  - Raid spawn chance factor (applies per village tick)
+  - Min/max raider count per raid
+  - Raider base health and damage
+  - Raider difficulty scaling per tier
+  - Raid cooldown periods per tier (HAMLET: 60 minutes, VILLAGE: 50 minutes, TOWN+: 40 minutes)
+- MILITARIZED specialization provides guard armor bonus (+2.0 armor)
+- Guard count displayed based on village tier (base + tier bonus)
+- Guard damage reduction mechanic (configurable)
+- Post-raid happiness penalty for failed defense (configurable)

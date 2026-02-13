@@ -369,6 +369,61 @@ public final class RotVConfigScreen {
                         config.economy.militarizedFoodPenalty)
                 .setSaveConsumer(value -> config.economy.militarizedFoodPenalty = value).build());
 
+        ConfigCategory defense = builder.getOrCreateCategory(Text.literal("Defense"));
+        defense.addEntry(entryBuilder
+                .startBooleanToggle(Text.literal("Enable raids"), config.progression.enableRaids)
+                .setSaveConsumer(value -> config.progression.enableRaids = value).build());
+        defense.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Raid spawn chance factor"),
+                        config.progression.raidSpawnChanceFactor)
+                .setSaveConsumer(value -> config.progression.raidSpawnChanceFactor = value)
+                .build());
+        defense.addEntry(entryBuilder
+                .startIntField(Text.literal("Min raiders per raid"),
+                        config.progression.minRaidersPerRaid)
+                .setSaveConsumer(value -> config.progression.minRaidersPerRaid = value).build());
+        defense.addEntry(entryBuilder
+                .startIntField(Text.literal("Max raiders per raid"),
+                        config.progression.maxRaidersPerRaid)
+                .setSaveConsumer(value -> config.progression.maxRaidersPerRaid = value).build());
+        defense.addEntry(entryBuilder
+                .startIntField(Text.literal("Raider base health"),
+                        config.progression.raiderHealthBase)
+                .setSaveConsumer(value -> config.progression.raiderHealthBase = value).build());
+        defense.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Raider base damage"),
+                        config.progression.raiderDamageBase)
+                .setSaveConsumer(value -> config.progression.raiderDamageBase = value).build());
+        defense.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Raider difficulty per tier"),
+                        config.progression.raiderDifficultyPerTier)
+                .setSaveConsumer(value -> config.progression.raiderDifficultyPerTier = value)
+                .build());
+        defense.addEntry(entryBuilder
+                .startIntField(Text.literal("Hamlet raid cooldown (ticks)"),
+                        config.progression.raidCooldownTicksHamlet)
+                .setSaveConsumer(value -> config.progression.raidCooldownTicksHamlet = value)
+                .build());
+        defense.addEntry(entryBuilder
+                .startIntField(Text.literal("Village raid cooldown (ticks)"),
+                        config.progression.raidCooldownTicksVillage)
+                .setSaveConsumer(value -> config.progression.raidCooldownTicksVillage = value)
+                .build());
+        defense.addEntry(entryBuilder
+                .startIntField(Text.literal("Town+ raid cooldown (ticks)"),
+                        config.progression.raidCooldownTownAndAbove)
+                .setSaveConsumer(value -> config.progression.raidCooldownTownAndAbove = value)
+                .build());
+        defense.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Guard damage reduction"),
+                        config.progression.guardDamageReduction)
+                .setSaveConsumer(value -> config.progression.guardDamageReduction = value).build());
+        defense.addEntry(entryBuilder
+                .startDoubleField(Text.literal("Post-raid happiness penalty"),
+                        config.progression.postRaidHappinessPenalty)
+                .setSaveConsumer(value -> config.progression.postRaidHappinessPenalty = value)
+                .build());
+
         ConfigCategory names = builder.getOrCreateCategory(Text.literal("Names"));
         names.addEntry(entryBuilder
                 .startBooleanToggle(Text.literal("Enable full names"), config.names.enableFullNames)
