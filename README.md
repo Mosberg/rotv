@@ -718,3 +718,1020 @@ You might one day stand in a grand capital square, surrounded by villagers whose
 ---
 
 If you want, next step could be to zoom in on one part—like fully specifying **Guard AI**, **VillageData fields**, or **a JSON structure for village specializations**—and turn it directly into code-ready pseudo-implementations.
+
+---\*\*\*---
+
+Great — now we can get very practical.
+Below is a **clean, modern 1.21.11‑compatible workflow** for:
+
+- Creating **custom village structure NBTs**
+- Writing **structure JSON**, **structure sets**, and **placement rules**
+- Targeting **Desert, Plains, Savanna, Snowy, and Taiga villages**
+
+I’ll give you **ready‑to‑use templates** that match the 1.20.5+ worldgen system (unchanged in 1.21.11).
+
+---
+
+# 🧱 1. Creating Your Structure NBT
+
+### 1. Build your structure in‑game
+
+1. Enter a world with cheats enabled.
+2. Build your structure.
+3. Use the **Structure Block**:
+
+```
+/give @s structure_block
+```
+
+4. Place it → set to **SAVE** mode.
+5. Define the bounding box.
+6. Save it under your namespace:
+
+```
+rotv/desert_house_01
+```
+
+This creates:
+
+```
+data/rotv/structures/desert_house_01.nbt
+```
+
+> **Tip:** For villages, keep pieces small (5×5 to 16×16) and modular.
+
+---
+
+# 🧩 2. Writing the Structure JSON
+
+Every structure needs a JSON file in:
+
+```
+data/rotv/worldgen/structure/<name>.json
+```
+
+Here is a **village‑style jigsaw structure** template:
+
+### **Example: desert_house_01.json**
+
+```json
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "minecraft:desert",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "rotv:desert/start",
+  "size": 7,
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}
+```
+
+---
+
+# 🧱 3. Creating the Jigsaw Pools
+
+Village structures use **structure pools**.
+
+Place them in:
+
+```
+data/rotv/worldgen/template_pool/desert/start.json
+```
+
+### **Example: desert/start.json**
+
+```json
+{
+  "name": "rotv:desert/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:desert_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+You can add more houses by adding more elements.
+
+---
+
+# 🗂️ 4. Structure Set (required in 1.20.5+)
+
+This tells Minecraft **how often** and **where** the structure can generate.
+
+Place in:
+
+```
+data/rotv/worldgen/structure_set/desert_village.json
+```
+
+### **Example: desert_village.json**
+
+```json
+{
+  "structures": [
+    {
+      "structure": "rotv:desert_house_01",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 8,
+    "salt": 123456789
+  }
+}
+```
+
+---
+
+# 🌍 5. Placement Rules
+
+Village‑like structures use **random_spread** placement.
+
+Spacing recommendations:
+
+| Village Type | spacing | separation |
+| ------------ | ------- | ---------- |
+| Plains       | 32–40   | 8–10       |
+| Desert       | 32–40   | 8–10       |
+| Savanna      | 32–40   | 8–10       |
+| Snowy        | 32–40   | 8–10       |
+| Taiga        | 32–40   | 8–10       |
+
+You can tune these to make villages more or less common.
+
+---
+
+# 🏜️ 6. Biome‑Specific Variants
+
+You want **Desert, Plains, Savanna, Snowy, Taiga**.
+
+You will create **five structure JSONs** and **five structure sets**, each with its own biome filter.
+
+### Example biome filters:
+
+| Village | biome tag                  |
+| ------- | -------------------------- |
+| Desert  | `"minecraft:desert"`       |
+| Plains  | `"minecraft:plains"`       |
+| Savanna | `"minecraft:savanna"`      |
+| Snowy   | `"minecraft:snowy_plains"` |
+| Taiga   | `"minecraft:taiga"`        |
+
+Each structure JSON should include:
+
+```json
+"biomes": "minecraft:desert"
+```
+
+(or whichever biome you target)
+
+---
+
+# 📦 Folder Layout (Complete)
+
+```
+data/
+  rotv/
+    structures/
+      desert_house_01.nbt
+      plains_house_01.nbt
+      savanna_house_01.nbt
+      snowy_house_01.nbt
+      taiga_house_01.nbt
+
+    worldgen/
+      structure/
+        desert_house_01.json
+        plains_house_01.json
+        savanna_house_01.json
+        snowy_house_01.json
+        taiga_house_01.json
+
+      template_pool/
+        desert/start.json
+        plains/start.json
+        savanna/start.json
+        snowy/start.json
+        taiga/start.json
+
+      structure_set/
+        desert_village.json
+        plains_village.json
+        savanna_village.json
+        snowy_village.json
+        taiga_village.json
+```
+
+---
+
+# If you want, I can generate:
+
+✅ All 5 structure JSONs
+✅ All 5 structure sets
+✅ All 5 template pools
+✅ A complete datapack folder ready to drop into Minecraft
+✅ Or Fabric mod code to register them programmatically
+
+Just tell me which format you prefer — **datapack or Fabric mod**.
+
+Here we go—full, drop‑in content you can actually use.
+
+---
+
+### Datapack structure
+
+```text
+rotv_villages_datapack/
+  pack.mcmeta
+  data/
+    rotv/
+      structures/
+        desert_house_01.nbt
+        plains_house_01.nbt
+        savanna_house_01.nbt
+        snowy_house_01.nbt
+        taiga_house_01.nbt
+
+      worldgen/
+        structure/
+          desert_village.json
+          plains_village.json
+          savanna_village.json
+          snowy_village.json
+          taiga_village.json
+
+        template_pool/
+          desert/start.json
+          plains/start.json
+          savanna/start.json
+          snowy/start.json
+          taiga/start.json
+
+        structure_set/
+          desert_village.json
+          plains_village.json
+          savanna_village.json
+          snowy_village.json
+          taiga_village.json
+```
+
+`pack.mcmeta`:
+
+```json
+{
+  "pack": {
+    "pack_format": 48,
+    "description": "Custom villages for Desert, Plains, Savanna, Snowy, Taiga (rotv)"
+  }
+}
+```
+
+> Adjust `pack_format` if Mojang bumps it in a later minor version.
+
+---
+
+## 1. Structure JSONs (5 biomes)
+
+`data/rotv/worldgen/structure/desert_village.json`:
+
+```json
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "minecraft:desert",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "rotv:desert/start",
+  "size": 7,
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}
+```
+
+`plains_village.json`:
+
+```json
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "minecraft:plains",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "rotv:plains/start",
+  "size": 7,
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}
+```
+
+`savanna_village.json`:
+
+```json
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "minecraft:savanna",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "rotv:savanna/start",
+  "size": 7,
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}
+```
+
+`snowy_village.json`:
+
+```json
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "minecraft:snowy_plains",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "rotv:snowy/start",
+  "size": 7,
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}
+```
+
+`taiga_village.json`:
+
+```json
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "minecraft:taiga",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "rotv:taiga/start",
+  "size": 7,
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}
+```
+
+---
+
+## 2. Template pools (5 biomes)
+
+Assuming one main piece per biome:
+
+- `rotv:desert_house_01`
+- `rotv:plains_house_01`
+- `rotv:savanna_house_01`
+- `rotv:snowy_house_01`
+- `rotv:taiga_house_01`
+
+You can add more later by adding more elements.
+
+`data/rotv/worldgen/template_pool/desert/start.json`:
+
+```json
+{
+  "name": "rotv:desert/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:desert_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+`plains/start.json`:
+
+```json
+{
+  "name": "rotv:plains/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:plains_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+`savanna/start.json`:
+
+```json
+{
+  "name": "rotv:savanna/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:savanna_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+`snowy/start.json`:
+
+```json
+{
+  "name": "rotv:snowy/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:snowy_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+`taiga/start.json`:
+
+```json
+{
+  "name": "rotv:taiga/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:taiga_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+---
+
+## 3. Structure sets (5 biomes)
+
+These control spacing/frequency.
+
+`data/rotv/worldgen/structure_set/desert_village.json`:
+
+```json
+{
+  "structures": [
+    {
+      "structure": "rotv:desert_village",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 8,
+    "salt": 123450001
+  }
+}
+```
+
+`plains_village.json`:
+
+```json
+{
+  "structures": [
+    {
+      "structure": "rotv:plains_village",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 8,
+    "salt": 123450002
+  }
+}
+```
+
+`savanna_village.json`:
+
+```json
+{
+  "structures": [
+    {
+      "structure": "rotv:savanna_village",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 8,
+    "salt": 123450003
+  }
+}
+```
+
+`snowy_village.json`:
+
+```json
+{
+  "structures": [
+    {
+      "structure": "rotv:snowy_village",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 8,
+    "salt": 123450004
+  }
+}
+```
+
+`taiga_village.json`:
+
+```json
+{
+  "structures": [
+    {
+      "structure": "rotv:taiga_village",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 8,
+    "salt": 123450005
+  }
+}
+```
+
+---
+
+## 4. Fabric mod side
+
+From 1.20.5+ the structures themselves are **data‑driven**. In a Fabric mod, you usually:
+
+- Put this datapack content under `src/main/resources/data/rotv/...`
+- No explicit Java registration is required for these structures/sets/pools.
+
+Minimal `ModInitializer`:
+
+```java
+package dk.mosberg;
+
+import net.fabricmc.api.ModInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class rotvMod implements ModInitializer {
+    public static final String MOD_ID = "rotv";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    @Override
+    public void onInitialize() {
+        LOGGER.info("rotv custom villages loaded.");
+        // All structure data is in data/rotv, no code registration needed.
+    }
+}
+```
+
+`fabric.mod.json` (core bits):
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "rotv",
+  "version": "1.0.0",
+  "name": "rotv Villages",
+  "entrypoints": {
+    "main": ["com.example.rotv.rotvMod"]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "1.21.11",
+    "fabric-api": "*"
+  }
+}
+```
+
+---
+
+If you tell me your **actual NBT names** (or if you want multi‑piece villages with roads, centers, etc.), I can wire up richer template pools with multiple weighted pieces instead of just one per biome.
+
+Mosberg, now we’re talking real village‑level worldgen — the fun stuff.
+Let’s build **full multi‑piece villages** with **roads, houses, centers, decorations, farms, and connectors**, all using the modern 1.20.5+ jigsaw system (still valid in 1.21.11).
+
+Below is a **clean, scalable template** you can expand infinitely.
+I’ll give you:
+
+- A **multi‑pool layout** for each biome
+- Weighted pieces
+- Roads that branch
+- Centers that anchor the village
+- Houses, decorations, farms
+- Connectors so the village grows naturally
+
+Everything is written so you can drop it into your datapack and immediately expand it.
+
+---
+
+# 🌍 Overall Village Structure Design
+
+Each biome village will have:
+
+### **1. Start Pool**
+
+Contains:
+
+- A **center** piece (well, plaza, campfire, etc.)
+- A **road_start** piece that begins the road network
+
+### **2. Road Pools**
+
+- `road_straight`
+- `road_turn`
+- `road_t_cross`
+- `road_end`
+
+### **3. House Pools**
+
+- 3–6 houses per biome, weighted
+
+### **4. Decoration Pools**
+
+- Lamp posts
+- Market stalls
+- Small props
+
+### **5. Farm Pools**
+
+- Small crop fields
+- Animal pens
+
+---
+
+# 📁 Folder Layout (multi‑piece version)
+
+```
+data/rotv/
+  structures/
+    desert/
+      center_01.nbt
+      road_straight_01.nbt
+      road_turn_01.nbt
+      road_t_01.nbt
+      road_end_01.nbt
+      house_01.nbt
+      house_02.nbt
+      house_03.nbt
+      farm_01.nbt
+      deco_01.nbt
+    plains/
+      (same structure types)
+    savanna/
+    snowy/
+    taiga/
+
+  worldgen/
+    structure/
+      desert_village.json
+      plains_village.json
+      savanna_village.json
+      snowy_village.json
+      taiga_village.json
+
+    structure_set/
+      desert_village.json
+      plains_village.json
+      savanna_village.json
+      snowy_village.json
+      taiga_village.json
+
+    template_pool/
+      desert/
+        start.json
+        roads.json
+        houses.json
+        farms.json
+        decorations.json
+      plains/
+      savanna/
+      snowy/
+      taiga/
+```
+
+---
+
+# 🧱 1. Structure JSON (same pattern for all biomes)
+
+### `data/rotv/worldgen/structure/desert_village.json`
+
+```json
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "minecraft:desert",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "rotv:desert/start",
+  "size": 15,
+  "start_height": { "absolute": 0 },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 120,
+  "use_expansion_hack": false
+}
+```
+
+Repeat for plains, savanna, snowy, taiga — only change:
+
+- `"biomes": "minecraft:<biome>"`
+- `"start_pool": "rotv:<biome>/start"`
+
+---
+
+# 🧩 2. Template Pools (multi‑piece)
+
+## **A. Start Pool**
+
+### `desert/start.json`
+
+```json
+{
+  "name": "rotv:desert/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:desert/center_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "location": "rotv:desert/road_straight_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 3
+    }
+  ]
+}
+```
+
+---
+
+## **B. Road Pool**
+
+### `desert/roads.json`
+
+```json
+{
+  "name": "rotv:desert/roads",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:desert/road_straight_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 5
+    },
+    {
+      "element": {
+        "location": "rotv:desert/road_turn_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "location": "rotv:desert/road_t_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "location": "rotv:desert/road_end_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+---
+
+## **C. House Pool**
+
+### `desert/houses.json`
+
+```json
+{
+  "name": "rotv:desert/houses",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:desert/house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "location": "rotv:desert/house_02",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 2
+    },
+    {
+      "element": {
+        "location": "rotv:desert/house_03",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
+```
+
+---
+
+## **D. Farms Pool**
+
+### `desert/farms.json`
+
+```json
+{
+  "name": "rotv:desert/farms",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:desert/farm_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 2
+    }
+  ]
+}
+```
+
+---
+
+## **E. Decorations Pool**
+
+### `desert/decorations.json`
+
+```json
+{
+  "name": "rotv:desert/decorations",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:desert/deco_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 3
+    }
+  ]
+}
+```
+
+---
+
+# 🗺️ 3. Structure Set (same pattern for all biomes)
+
+### `desert_village.json`
+
+```json
+{
+  "structures": [{ "structure": "rotv:desert_village", "weight": 1 }],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 34,
+    "separation": 8,
+    "salt": 900001
+  }
+}
+```
+
+Repeat for each biome with a different salt.
+
+---
+
+# 🧠 How the Jigsaw Connections Work
+
+Your NBT pieces must include jigsaw blocks with these names:
+
+| Piece Type  | Jigsaw Target             |
+| ----------- | ------------------------- |
+| Roads       | `rotv:desert/roads`       |
+| Houses      | `rotv:desert/houses`      |
+| Farms       | `rotv:desert/farms`       |
+| Decorations | `rotv:desert/decorations` |
+| Start       | `rotv:desert/start`       |
+
+Each piece should have:
+
+- **1–4 road connectors**
+- **Optional house connectors**
+- **Optional decoration connectors**
+- **Optional farm connectors**
+
+This is how villages grow naturally.
+
+---
+
+# 🏗️ Want me to generate the **NBT jigsaw block setup** for each piece?
+
+I can generate:
+
+- Jigsaw block positions
+- Namespaces
+- `target_pool`
+- `final_state`
+- `joint` type
+- Recommended piece sizes
+
+Or I can generate:
+
+### ✔ Full datapack with all 5 biomes
+
+### ✔ 50+ structure pools
+
+### ✔ Road networks
+
+### ✔ Weighted houses
+
+### ✔ Decorations & farms
+
+### ✔ A complete “vanilla‑style” village system
+
+Just tell me how big you want each village to be —
+**small**, **medium**, or **large** — and I’ll scale the entire system for you.

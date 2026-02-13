@@ -10,6 +10,8 @@ import java.util.Set;
 import dk.mosberg.config.ProgressionConfig;
 import dk.mosberg.config.RotVConfig;
 import dk.mosberg.economy.VillageEconomyManager;
+import dk.mosberg.quests.Quest;
+import dk.mosberg.quests.QuestManager;
 import dk.mosberg.villager.RotVProfession;
 import dk.mosberg.villager.RotVProfessionProgression;
 import dk.mosberg.villager.RotVVillagerData;
@@ -70,7 +72,28 @@ public final class VillageProfileManager {
         }
         profile.setBeds(beds.size());
         profile.setWorkstations(workstations.size());
-        profile.setTier(resolveTier(profile.getPopulation(), config.progression));
+
+        // Track tier changes for quest progression
+        VillageTier oldTier = profile.getTier();
+        VillageTier newTier = resolveTier(profile.getPopulation(), config.progression);
+        profile.setTier(newTier);
+
+        // Check population growth for quest
+        int oldPopulation = profile.getPopulation();
+        int newPopulation = members.size();
+        if (newPopulation > oldPopulation) {
+            QuestManager.progressQuest(profile.getId(), Quest.QuestType.GROW_POPULATION,
+                    newPopulation - oldPopulation);
+        }
+
+        // Track structure building (workstations)
+        int oldWorkstations = profile.getWorkstations();
+        int newWorkstations = workstations.size();
+        if (newWorkstations > oldWorkstations) {
+            QuestManager.progressQuest(profile.getId(), Quest.QuestType.BUILD_STRUCTURES,
+                    newWorkstations - oldWorkstations);
+        }
+
         profile.setSpecialization(
                 resolveSpecialization(profile, specializationCounts, config.progression));
         float baseHappiness = Math.min(1.0f, profile.getPopulation() / 20.0f);
@@ -80,6 +103,15 @@ public final class VillageProfileManager {
         float happiness =
                 clamp01(baseHappiness + resolveHappinessBonus(specialization, config.progression)
                         + (float) tierMods.happinessBonus());
+
+        // Track happiness increases for quest
+        float oldHappiness = profile.getHappiness();
+        if (happiness > oldHappiness) {
+            float happinessGain = (happiness - oldHappiness) * 100; // Convert to percentage
+            QuestManager.progressQuest(profile.getId(), Quest.QuestType.INCREASE_HAPPINESS,
+                    (int) happinessGain);
+        }
+
         float security =
                 clamp01(baseSecurity + resolveSecurityBonus(specialization, config.progression)
                         + (float) tierMods.securityBonus());

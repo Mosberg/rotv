@@ -164,7 +164,7 @@ public class GovernanceManager {
     }
 
     // Load/save helpers for VillagePersistentState
-    public static void loadFromNbt(NbtCompound nbt, ServerWorld world) {
+    public static void loadFromNbt(NbtCompound nbt) {
         int leaderCount = nbt.getInt("LeaderCount").orElse(0);
         for (int i = 0; i < leaderCount; i++) {
             var leaderNbtOpt = nbt.getCompound("Leader_" + i);

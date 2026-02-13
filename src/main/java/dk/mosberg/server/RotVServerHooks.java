@@ -6,6 +6,7 @@ import dk.mosberg.config.RotVConfigManager;
 import dk.mosberg.defense.DefenseManager;
 import dk.mosberg.governance.GovernanceManager;
 import dk.mosberg.quests.QuestManager;
+import dk.mosberg.village.VillageDataPersistentState;
 import dk.mosberg.village.VillageProfileManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
@@ -27,6 +28,9 @@ public final class RotVServerHooks {
         }
 
         long time = server.getOverworld().getTime();
+
+        // Initialize persistent state (loads data if not already loaded)
+        VillageDataPersistentState.get(server.getOverworld());
 
         if (config.ai.villageScanIntervalTicks > 0
                 && time % config.ai.villageScanIntervalTicks == 0L) {
@@ -55,6 +59,13 @@ public final class RotVServerHooks {
         // Tick governance systems
         for (ServerWorld world : server.getWorlds()) {
             GovernanceManager.tickGovernance(world);
+        }
+
+        // Mark persistent state dirty to ensure saves happen
+        if (time % 100 == 0) { // Every 5 seconds
+            VillageDataPersistentState state =
+                    VillageDataPersistentState.get(server.getOverworld());
+            state.markDirtyStatic();
         }
     }
 }

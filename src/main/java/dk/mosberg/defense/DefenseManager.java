@@ -3,6 +3,8 @@ package dk.mosberg.defense;
 import java.util.HashMap;
 import java.util.Map;
 import dk.mosberg.config.RotVConfig;
+import dk.mosberg.quests.Quest;
+import dk.mosberg.quests.QuestManager;
 import dk.mosberg.village.VillagePersistentState;
 import dk.mosberg.village.VillageProfile;
 import net.minecraft.server.world.ServerWorld;
@@ -47,6 +49,9 @@ public class DefenseManager {
         RaidManager raidManager = raidManagers.get(worldId);
         if (raidManager != null) {
             raidManager.recordRaiderDefeated(villageId);
+
+            // Progress DEFEND_VILLAGE quest when raider defeated
+            QuestManager.progressQuest(villageId, Quest.QuestType.DEFEND_VILLAGE, 1);
         }
     }
 

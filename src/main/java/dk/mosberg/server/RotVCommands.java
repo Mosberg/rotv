@@ -7,6 +7,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import dk.mosberg.defense.Fortification;
+import dk.mosberg.defense.FortificationManager;
+import dk.mosberg.quests.Quest;
+import dk.mosberg.quests.QuestManager;
 import dk.mosberg.village.VillagePersistentState;
 import dk.mosberg.village.VillageProfile;
 import dk.mosberg.villager.RotVProfession;
@@ -108,8 +112,52 @@ public final class RotVCommands {
                                         .argument("amount", IntegerArgumentType.integer())
                                         .executes(ctx -> addMaterials(ctx.getSource(),
                                                 EntityArgumentType.getEntity(ctx, "villager"),
-                                                IntegerArgumentType.getInteger(ctx,
-                                                        "amount"))))))));
+                                                IntegerArgumentType.getInteger(ctx, "amount")))))))
+                .then(CommandManager.literal("quest").then(CommandManager.literal("list")
+                        .then(CommandManager.argument("villager", EntityArgumentType.entity())
+                                .executes(ctx -> listQuests(ctx.getSource(),
+                                        EntityArgumentType.getEntity(ctx, "villager")))))
+                        .then(CommandManager.literal("activate").then(CommandManager
+                                .argument("villager", EntityArgumentType.entity())
+                                .then(CommandManager.argument("questId", StringArgumentType.word())
+                                        .executes(ctx -> activateQuest(ctx.getSource(),
+                                                EntityArgumentType.getEntity(ctx, "villager"),
+                                                StringArgumentType.getString(ctx, "questId"))))))
+                        .then(CommandManager.literal("progress").then(CommandManager
+                                .argument("villager", EntityArgumentType.entity())
+                                .then(CommandManager
+                                        .argument("questType", StringArgumentType.word())
+                                        .then(CommandManager
+                                                .argument("amount", IntegerArgumentType.integer())
+                                                .executes(ctx -> progressQuest(ctx.getSource(),
+                                                        EntityArgumentType.getEntity(ctx,
+                                                                "villager"),
+                                                        StringArgumentType.getString(ctx,
+                                                                "questType"),
+                                                        IntegerArgumentType.getInteger(ctx,
+                                                                "amount"))))))))
+                .then(CommandManager.literal("fortification").then(CommandManager.literal("list")
+                        .then(CommandManager.argument("villager", EntityArgumentType.entity())
+                                .executes(ctx -> listFortifications(ctx.getSource(),
+                                        EntityArgumentType.getEntity(ctx, "villager")))))
+                        .then(CommandManager.literal("build").then(CommandManager
+                                .argument("villager", EntityArgumentType.entity())
+                                .then(CommandManager.argument("type", StringArgumentType.word())
+                                        .executes(ctx -> buildFortification(ctx.getSource(),
+                                                EntityArgumentType.getEntity(ctx, "villager"),
+                                                StringArgumentType.getString(ctx, "type"))))))
+                        .then(CommandManager.literal("repair").then(CommandManager
+                                .argument("villager", EntityArgumentType.entity())
+                                .then(CommandManager.argument("type", StringArgumentType.word())
+                                        .executes(ctx -> repairFortification(ctx.getSource(),
+                                                EntityArgumentType.getEntity(ctx, "villager"),
+                                                StringArgumentType.getString(ctx, "type"))))))
+                        .then(CommandManager.literal("upgrade").then(CommandManager
+                                .argument("villager", EntityArgumentType.entity())
+                                .then(CommandManager.argument("type", StringArgumentType.word())
+                                        .executes(ctx -> upgradeFortification(ctx.getSource(),
+                                                EntityArgumentType.getEntity(ctx, "villager"),
+                                                StringArgumentType.getString(ctx, "type"))))))));
     }
 
     private static VillagerEntity requireVillager(Entity entity) throws CommandSyntaxException {
@@ -239,6 +287,176 @@ public final class RotVCommands {
         state.markDirty();
         return profile;
     }
+
+    private static int listQuests(ServerCommandSource source, Entity entity)
+            throws CommandSyntaxException {
+        VillageProfile profile = getVillageProfile(source, entity);
+        java.util.List<Quest> quests = QuestManager.getActiveQuests(profile.getId());
+
+        if (quests.isEmpty()) {
+            source.sendFeedback(() -> Text.literal("No quests for this village."), false);
+            return 0;
+        }
+
+        source.sendFeedback(() -> Text.literal("=== Village Quests ==="), false);
+        for (Quest quest : quests) {
+            String status = quest.getStatus().name();
+            String progress = quest.getProgress() + "/" + quest.getObjective().target();
+            source.sendFeedback(() -> Text.literal(quest.getId() + " - " + quest.getName() + " ["
+                    + status + "] (" + progress + ")"), false);
+            source.sendFeedback(() -> Text.literal("  " + quest.getDescription()), false);
+        }
+        return quests.size();
+    }
+
+    private static int activateQuest(ServerCommandSource source, Entity entity, String questId)
+            throws CommandSyntaxException {
+        VillageProfile profile = getVillageProfile(source, entity);
+        QuestManager.activateQuest(profile.getId(), questId);
+        source.sendFeedback(() -> Text.literal("Quest activated: " + questId), true);
+        return 1;
+    }
+
+    private static int progressQuest(ServerCommandSource source, Entity entity, String questTypeStr,
+            int amount) throws CommandSyntaxException {
+        VillageProfile profile = getVillageProfile(source, entity);
+
+        try {
+            Quest.QuestType questType = Quest.QuestType.valueOf(questTypeStr.toUpperCase());
+            QuestManager.progressQuest(profile.getId(), questType, amount);
+            source.sendFeedback(() -> Text.literal("Quest progress: " + questType + " +" + amount),
+                    true);
+            return 1;
+        } catch (IllegalArgumentException e) {
+            source.sendFeedback(() -> Text.literal("Unknown quest type: " + questTypeStr), false);
+            return 0;
+        }
+    }
+
+    // ==================== Fortification Commands ====================
+
+    private static int listFortifications(ServerCommandSource source, Entity entity)
+            throws CommandSyntaxException {
+        VillageProfile profile = getVillageProfile(source, entity);
+        java.util.List<Fortification> fortifications =
+                FortificationManager.getFortifications(profile.getId());
+
+        if (fortifications.isEmpty()) {
+            source.sendFeedback(() -> Text.literal("No fortifications in this village."), false);
+            return 0;
+        }
+
+        source.sendFeedback(() -> Text.literal("=== Village Fortifications ==="), false);
+        float totalDefense = FortificationManager.getTotalDefenseBonus(profile.getId());
+        source.sendFeedback(
+                () -> Text.literal("Total Defense Bonus: " + (totalDefense * 100) + "%"), false);
+
+        for (Fortification fort : fortifications) {
+            String status = fort.isDestroyed() ? " [DESTROYED]" : "";
+            String integrity = String.format("%.0f%%", fort.getIntegrity() * 100);
+            source.sendFeedback(() -> Text.literal(fort.getType().name() + " (Lvl "
+                    + fort.getLevel() + ")" + status + " - Integrity: " + integrity), false);
+            source.sendFeedback(() -> Text
+                    .literal("  Defense: +" + (fort.getEffectiveDefenseBonus() * 100) + "%"),
+                    false);
+        }
+        return fortifications.size();
+    }
+
+    private static int buildFortification(ServerCommandSource source, Entity entity, String typeStr)
+            throws CommandSyntaxException {
+        VillageProfile profile = getVillageProfile(source, entity);
+
+        try {
+            Fortification.FortificationType type =
+                    Fortification.FortificationType.valueOf(typeStr.toUpperCase());
+
+            if (FortificationManager.hasFortificationType(profile.getId(), type)) {
+                source.sendFeedback(
+                        () -> Text.literal("Village already has this fortification type!"), false);
+                return 0;
+            }
+
+            boolean success =
+                    FortificationManager.buildFortification(profile.getId(), type, profile);
+            if (success) {
+                source.sendFeedback(() -> Text.literal("Built " + type.name() + "!"), true);
+                return 1;
+            } else {
+                source.sendFeedback(
+                        () -> Text.literal("Not enough resources! Need " + type.getMaterialCost()
+                                + " materials and " + type.getWealthCost() + " wealth."),
+                        false);
+                return 0;
+            }
+        } catch (IllegalArgumentException e) {
+            source.sendFeedback(() -> Text.literal("Unknown fortification type: " + typeStr
+                    + ". Valid types: WOODEN_WALL, STONE_WALL, WATCHTOWER, IRON_GATE, BARRICADE"),
+                    false);
+            return 0;
+        }
+    }
+
+    private static int repairFortification(ServerCommandSource source, Entity entity,
+            String typeStr) throws CommandSyntaxException {
+        VillageProfile profile = getVillageProfile(source, entity);
+
+        try {
+            Fortification.FortificationType type =
+                    Fortification.FortificationType.valueOf(typeStr.toUpperCase());
+
+            boolean success =
+                    FortificationManager.repairFortification(profile.getId(), type, profile);
+            if (success) {
+                source.sendFeedback(() -> Text.literal("Repaired " + type.name() + "!"), true);
+                return 1;
+            } else {
+                int matCost = (int) (type.getMaterialCost() * 0.25);
+                int wealthCost = (int) (type.getWealthCost() * 0.25);
+                source.sendFeedback(() -> Text.literal("Cannot repair! Need " + matCost
+                        + " materials and " + wealthCost
+                        + " wealth, or fortification doesn't exist/already at full integrity."),
+                        false);
+                return 0;
+            }
+        } catch (IllegalArgumentException e) {
+            source.sendFeedback(() -> Text.literal("Unknown fortification type: " + typeStr),
+                    false);
+            return 0;
+        }
+    }
+
+    private static int upgradeFortification(ServerCommandSource source, Entity entity,
+            String typeStr) throws CommandSyntaxException {
+        VillageProfile profile = getVillageProfile(source, entity);
+
+        try {
+            Fortification.FortificationType type =
+                    Fortification.FortificationType.valueOf(typeStr.toUpperCase());
+
+            boolean success =
+                    FortificationManager.upgradeFortification(profile.getId(), type, profile);
+            if (success) {
+                source.sendFeedback(() -> Text.literal("Upgraded " + type.name() + "!"), true);
+                return 1;
+            } else {
+                int matCost = (int) (type.getMaterialCost() * 1.5);
+                int wealthCost = (int) (type.getWealthCost() * 1.5);
+                source.sendFeedback(
+                        () -> Text.literal("Cannot upgrade! Need " + matCost + " materials and "
+                                + wealthCost
+                                + " wealth, or fortification doesn't exist/already at max level."),
+                        false);
+                return 0;
+            }
+        } catch (IllegalArgumentException e) {
+            source.sendFeedback(() -> Text.literal("Unknown fortification type: " + typeStr),
+                    false);
+            return 0;
+        }
+    }
+
+    // ==================== Utility Methods ====================
 
     private static RotVProfession parseProfession(String value) throws CommandSyntaxException {
         try {

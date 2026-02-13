@@ -62,8 +62,17 @@ public class CombatManager {
 
         // Apply damage reduction if village is under raid
         if (DefenseManager.isUnderRaid(world, villageId)) {
-            float reductionFactor = (float) (1.0 - config.progression.guardDamageReduction);
-            float reducedDamage = damage * reductionFactor;
+            // Base damage reduction from config
+            float totalReduction = (float) config.progression.guardDamageReduction;
+
+            // Add fortification defense bonus
+            float fortificationBonus = FortificationManager.getTotalDefenseBonus(villageId);
+            totalReduction += fortificationBonus;
+
+            // Cap total reduction at 75%
+            totalReduction = Math.min(0.75f, totalReduction);
+
+            float reducedDamage = damage * (1.0f - totalReduction);
 
             // Also apply guard armor bonus
             float armorBonus = (float) guardTeam.armorBonus();

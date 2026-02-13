@@ -54,6 +54,12 @@ public class RaidManager {
         double tierFactor = village.getTier().ordinal() * 0.01;
         double totalChance = populationFactor + tierFactor;
 
+        // Reduce raid chance based on fortifications (10% reduction per 10% defense bonus)
+        float fortificationBonus = FortificationManager.getTotalDefenseBonus(village.getId());
+        double fortificationReduction = fortificationBonus * 1.0; // Full defense bonus reduces
+                                                                  // spawn chance
+        totalChance = Math.max(0.0, totalChance - fortificationReduction);
+
         return Math.random() < totalChance;
     }
 
@@ -106,6 +112,10 @@ public class RaidManager {
         if (raid != null) {
             RaidState updated = raid.withRaiderDefeated();
             if (updated.isComplete()) {
+                // Raid complete - damage fortifications based on raid difficulty
+                float damagePercent = (float) (0.1 + (raid.difficulty * 0.05)); // 10-30% damage
+                FortificationManager.damageAllFortifications(villageId, damagePercent);
+
                 activeRaids.remove(villageId);
             } else {
                 activeRaids.put(villageId, updated);
