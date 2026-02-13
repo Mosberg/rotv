@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import dk.mosberg.config.ProgressionConfig;
 import dk.mosberg.config.RotVConfig;
+import dk.mosberg.economy.VillageEconomyManager;
 import dk.mosberg.villager.RotVVillagerData;
 import dk.mosberg.villager.RotVVillagerDataUtil;
 import net.minecraft.entity.EntityType;
@@ -34,13 +35,13 @@ public final class VillageProfileManager {
             List<VillagerEntity> members = entry.getValue();
             String id = world.getRegistryKey().getValue() + "@" + center.toShortString();
             VillageProfile profile = state.getOrCreate(id, center);
-            updateProfile(world, profile, members, config.progression);
+            updateProfile(world, profile, members, config);
             state.markDirty();
         }
     }
 
     private static void updateProfile(ServerWorld world, VillageProfile profile,
-            List<VillagerEntity> members, ProgressionConfig config) {
+            List<VillagerEntity> members, RotVConfig config) {
         profile.setCenter(members.getFirst().getBlockPos());
         profile.setPopulation(members.size());
         Set<BlockPos> beds = new HashSet<>();
@@ -56,9 +57,10 @@ public final class VillageProfileManager {
         }
         profile.setBeds(beds.size());
         profile.setWorkstations(workstations.size());
-        profile.setTier(resolveTier(profile.getPopulation(), config));
+        profile.setTier(resolveTier(profile.getPopulation(), config.progression));
         profile.setHappiness(Math.min(1.0f, profile.getPopulation() / 20.0f));
         profile.setSecurity(Math.min(1.0f, profile.getPopulation() / 30.0f));
+        VillageEconomyManager.updateProfile(profile, members, config.economy, config.ai);
         profile.setLastUpdated(world.getTime());
     }
 

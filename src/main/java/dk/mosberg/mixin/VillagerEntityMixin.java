@@ -7,17 +7,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dk.mosberg.config.RotVConfigManager;
+import dk.mosberg.economy.VillageEconomyManager;
+import dk.mosberg.villager.RotVProfessionProgression;
+import dk.mosberg.villager.RotVScheduleState;
 import dk.mosberg.villager.RotVVillagerAccess;
 import dk.mosberg.villager.RotVVillagerData;
 import dk.mosberg.villager.RotVVillagerDataUtil;
-import dk.mosberg.villager.RotVVillagerPersonality;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.village.TradeOffer;
 
 @Mixin(VillagerEntity.class)
 public class VillagerEntityMixin implements RotVVillagerAccess {
@@ -53,9 +57,7 @@ public class VillagerEntityMixin implements RotVVillagerAccess {
     @Inject(method = "tick", at = @At("TAIL"))
     private void rotv$onTick(CallbackInfo ci) {
         VillagerEntity villager = (VillagerEntity) (Object) this;
-        if (rotv$data.getPersonality() == null) {
-            rotv$data.setPersonality(RotVVillagerPersonality.random(villager.getRandom()));
-        }
+        RotVVillagerDataUtil.ensureInitialized(villager);
         if (!RotVConfigManager.get().modules.coreAi) {
             return;
         }
@@ -67,5 +69,30 @@ public class VillagerEntityMixin implements RotVVillagerAccess {
             return;
         }
         RotVVillagerDataUtil.updateFromBrain(villager);
+        if (RotVConfigManager.get().modules.professions) {
+            RotVVillagerData data = rotv$data;
+            RotVProfessionProgression.syncProfession(villager);
+            if (data.getScheduleState() == RotVScheduleState.WORK && data.getJobSitePos() != null
+                    && RotVConfigManager.get().professions.workXpIntervalTicks > 0
+                    && villager.getEntityWorld().getTime()
+                            % RotVConfigManager.get().professions.workXpIntervalTicks == 0L) {
+                RotVProfessionProgression.addWorkXp(villager);
+            }
+
+            int currentUses = 0;
+            for (TradeOffer offer : villager.getOffers()) {
+                currentUses += offer.getUses();
+            }
+            int lastUses = data.getLastTradeUses();
+            if (currentUses > lastUses) {
+                int delta = currentUses - lastUses;
+                RotVProfessionProgression.addTradeXp(villager, delta);
+                if (villager.getWorld() instanceof ServerWorld serverWorld) {
+                    VillageEconomyManager.applyTradeGain(serverWorld, villager, delta);
+                }
+            }
+            data.setLastTradeUses(currentUses);
+            RotVProfessionProgression.applyPerks(villager);
+        }
     }
 }

@@ -14,6 +14,7 @@ public class VillageProfile {
     private float happiness;
     private float security;
     private int food;
+    private int materials;
     private int wealth;
     private long lastUpdated;
 
@@ -46,6 +47,7 @@ public class VillageProfile {
         profile.happiness = nbt.getFloat("Happiness").orElse(0.0f);
         profile.security = nbt.getFloat("Security").orElse(0.0f);
         profile.food = nbt.getInt("Food").orElse(0);
+        profile.materials = nbt.getInt("Materials").orElse(0);
         profile.wealth = nbt.getInt("Wealth").orElse(0);
         profile.lastUpdated = nbt.getLong("LastUpdated").orElse(0L);
         return profile;
@@ -65,6 +67,7 @@ public class VillageProfile {
         nbt.putFloat("Happiness", happiness);
         nbt.putFloat("Security", security);
         nbt.putInt("Food", food);
+        nbt.putInt("Materials", materials);
         nbt.putInt("Wealth", wealth);
         nbt.putLong("LastUpdated", lastUpdated);
         return nbt;
@@ -144,6 +147,14 @@ public class VillageProfile {
 
     public void setFood(int food) {
         this.food = food;
+    }
+
+    public int getMaterials() {
+        return materials;
+    }
+
+    public void setMaterials(int materials) {
+        this.materials = materials;
     }
 
     public int getWealth() {

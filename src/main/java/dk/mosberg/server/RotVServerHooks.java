@@ -11,6 +11,7 @@ public final class RotVServerHooks {
     private RotVServerHooks() {}
 
     public static void init() {
+        RotVEntityEvents.init();
         ServerTickEvents.END_SERVER_TICK.register(RotVServerHooks::onServerTick);
     }
 

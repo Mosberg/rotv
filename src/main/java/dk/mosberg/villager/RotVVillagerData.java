@@ -10,8 +10,13 @@ public class RotVVillagerData {
     private UUID lastAttackerUuid;
     private UUID lastTradePlayerUuid;
     private long lastThreatTime;
+    private int lastTradeUses;
+    private UUID familyId;
+    private String firstName;
+    private String lastName;
     private RotVScheduleState scheduleState = RotVScheduleState.REST;
     private RotVVillagerPersonality personality = new RotVVillagerPersonality();
+    private RotVVillagerProfessionData profession = new RotVVillagerProfessionData();
     private BlockPos homePos;
     private BlockPos jobSitePos;
 
@@ -21,6 +26,10 @@ public class RotVVillagerData {
             lastTradePlayerUuid =
                     rotv.getString("LastTradePlayer").map(UUID::fromString).orElse(null);
             lastThreatTime = rotv.getLong("LastThreatTime").orElse(0L);
+            lastTradeUses = rotv.getInt("LastTradeUses").orElse(0);
+            familyId = rotv.getString("FamilyId").map(UUID::fromString).orElse(null);
+            firstName = rotv.getString("FirstName").orElse(firstName);
+            lastName = rotv.getString("LastName").orElse(lastName);
 
             String scheduleValue = rotv.getString("ScheduleState").orElse(null);
             if (scheduleValue != null) {
@@ -32,6 +41,7 @@ public class RotVVillagerData {
             }
 
             rotv.getCompound("Personality").ifPresent(personality::readFromNbt);
+            rotv.getCompound("Profession").ifPresent(profession::readFromNbt);
             rotv.getCompound("HomePos").ifPresent(tag -> homePos = readBlockPos(tag));
             rotv.getCompound("JobSitePos").ifPresent(tag -> jobSitePos = readBlockPos(tag));
         });
@@ -46,10 +56,23 @@ public class RotVVillagerData {
             rotv.putString("LastTradePlayer", lastTradePlayerUuid.toString());
         }
         rotv.putLong("LastThreatTime", lastThreatTime);
+        rotv.putInt("LastTradeUses", lastTradeUses);
+        if (familyId != null) {
+            rotv.putString("FamilyId", familyId.toString());
+        }
+        if (firstName != null) {
+            rotv.putString("FirstName", firstName);
+        }
+        if (lastName != null) {
+            rotv.putString("LastName", lastName);
+        }
         rotv.putString("ScheduleState", scheduleState.name());
         NbtCompound personalityTag = new NbtCompound();
         personality.writeToNbt(personalityTag);
         rotv.put("Personality", personalityTag);
+        NbtCompound professionTag = new NbtCompound();
+        profession.writeToNbt(professionTag);
+        rotv.put("Profession", professionTag);
         if (homePos != null) {
             rotv.put("HomePos", writeBlockPos(homePos));
         }
@@ -88,6 +111,38 @@ public class RotVVillagerData {
         this.lastTradePlayerUuid = lastTradePlayerUuid;
     }
 
+    public int getLastTradeUses() {
+        return lastTradeUses;
+    }
+
+    public void setLastTradeUses(int lastTradeUses) {
+        this.lastTradeUses = Math.max(0, lastTradeUses);
+    }
+
+    public UUID getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(UUID familyId) {
+        this.familyId = familyId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public long getLastThreatTime() {
         return lastThreatTime;
     }
@@ -110,6 +165,14 @@ public class RotVVillagerData {
 
     public void setPersonality(RotVVillagerPersonality personality) {
         this.personality = personality;
+    }
+
+    public RotVVillagerProfessionData getProfession() {
+        return profession;
+    }
+
+    public void setProfession(RotVVillagerProfessionData profession) {
+        this.profession = profession == null ? new RotVVillagerProfessionData() : profession;
     }
 
     public BlockPos getHomePos() {
