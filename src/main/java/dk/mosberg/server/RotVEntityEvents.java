@@ -19,7 +19,7 @@ public final class RotVEntityEvents {
 
     private static void onAfterDamage(LivingEntity entity, DamageSource source,
             float baseDamageTaken, float damageTaken, boolean blocked) {
-        if (entity.getWorld().isClient) {
+        if (entity.getEntityWorld().isClient()) {
             return;
         }
         if (!RotVConfigManager.get().modules.coreAi) {
@@ -44,6 +44,6 @@ public final class RotVEntityEvents {
 
         RotVVillagerData data = RotVVillagerDataUtil.getData(villager);
         data.setLastAttackerUuid(livingAttacker.getUuid());
-        data.setLastThreatTime(entity.getWorld().getTime());
+        data.setLastThreatTime(entity.getEntityWorld().getTime());
     }
 }

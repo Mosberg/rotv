@@ -10,12 +10,12 @@ import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.util.Identifier;
 
 public final class RotVProfessionProgression {
-    private static final Identifier HUNTER_SPEED_ID = new Identifier("rotv", "hunter_speed");
-    private static final Identifier ENGINEER_HEALTH_ID = new Identifier("rotv", "engineer_health");
-    private static final Identifier GUARD_ARMOR_ID = new Identifier("rotv", "guard_armor");
-    private static final Identifier MAGE_RANGE_ID = new Identifier("rotv", "mage_range");
-    private static final Identifier CARAVAN_SPEED_ID = new Identifier("rotv", "caravan_speed");
-    private static final Identifier ARCHITECT_SPEED_ID = new Identifier("rotv", "architect_speed");
+    private static final Identifier HUNTER_SPEED_ID = Identifier.of("rotv", "hunter_speed");
+    private static final Identifier ENGINEER_HEALTH_ID = Identifier.of("rotv", "engineer_health");
+    private static final Identifier GUARD_ARMOR_ID = Identifier.of("rotv", "guard_armor");
+    private static final Identifier MAGE_RANGE_ID = Identifier.of("rotv", "mage_range");
+    private static final Identifier CARAVAN_SPEED_ID = Identifier.of("rotv", "caravan_speed");
+    private static final Identifier ARCHITECT_SPEED_ID = Identifier.of("rotv", "architect_speed");
 
     private RotVProfessionProgression() {}
 

@@ -70,6 +70,9 @@ public class VillagerEntityMixin implements RotVVillagerAccess {
         }
         RotVVillagerDataUtil.updateFromBrain(villager);
         if (RotVConfigManager.get().modules.professions) {
+            if (villager.getEntityWorld().isClient()) {
+                return;
+            }
             RotVVillagerData data = rotv$data;
             RotVProfessionProgression.syncProfession(villager);
             if (data.getScheduleState() == RotVScheduleState.WORK && data.getJobSitePos() != null
@@ -87,7 +90,7 @@ public class VillagerEntityMixin implements RotVVillagerAccess {
             if (currentUses > lastUses) {
                 int delta = currentUses - lastUses;
                 RotVProfessionProgression.addTradeXp(villager, delta);
-                if (villager.getWorld() instanceof ServerWorld serverWorld) {
+                if (villager.getEntityWorld() instanceof ServerWorld serverWorld) {
                     VillageEconomyManager.applyTradeGain(serverWorld, villager, delta);
                 }
             }

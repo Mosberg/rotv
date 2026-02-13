@@ -65,8 +65,8 @@ public final class RotVVillagerDataUtil {
         RotVVillagerData selfData = getData(villager);
         BlockPos selfHome = selfData.getHomePos();
         Box box = villager.getBoundingBox().expand(24.0);
-        for (VillagerEntity nearby : villager.getWorld().getEntitiesByClass(VillagerEntity.class,
-                box, other -> other != villager)) {
+        for (VillagerEntity nearby : villager.getEntityWorld()
+                .getEntitiesByClass(VillagerEntity.class, box, other -> other != villager)) {
             RotVVillagerData data = getData(nearby);
             if (data.getLastName() == null || data.getLastName().isEmpty()) {
                 continue;
@@ -76,8 +76,8 @@ public final class RotVVillagerDataUtil {
                 return new FamilyInfo(data.getFamilyId(), data.getLastName());
             }
         }
-        for (VillagerEntity nearby : villager.getWorld().getEntitiesByClass(VillagerEntity.class,
-                box, other -> other != villager)) {
+        for (VillagerEntity nearby : villager.getEntityWorld()
+                .getEntitiesByClass(VillagerEntity.class, box, other -> other != villager)) {
             RotVVillagerData data = getData(nearby);
             if (data.getLastName() == null || data.getLastName().isEmpty()) {
                 continue;
