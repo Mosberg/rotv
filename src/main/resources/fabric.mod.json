@@ -18,10 +18,14 @@
     "client": ["${mod_entrypoint_client}"],
     "modmenu": ["${mod_entrypoint_modmenu}"]
   },
+  "mixins": ["rotv.mixins.json"],
   "depends": {
     "fabricloader": ">=0.18.4",
     "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
+  },
+  "suggests": {
+    "cloth-config": "*"
   }
 }

@@ -21,6 +21,10 @@ repositories {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/releases"
     }
+    maven {
+        name = "Shedaniel"
+        url = "https://maven.shedaniel.me/"
+    }
 }
 
 loom {
@@ -48,12 +52,6 @@ dependencies {
     // Annotations (compile-only)
     compileOnly "org.jetbrains:annotations:${project.annotations_version}"
 
-    // SLF4J (bundled)
-    implementation "org.slf4j:slf4j-api:${project.slf4j_version}"
-    runtimeOnly "org.slf4j:slf4j-simple:${project.slf4j_version}"
-    include "org.slf4j:slf4j-api:${project.slf4j_version}"
-    include "org.slf4j:slf4j-simple:${project.slf4j_version}"
-
     // Testing
     testImplementation platform("org.junit:junit-bom:${project.junit_version}")
     testImplementation "org.junit.jupiter:junit-jupiter"
@@ -62,6 +60,9 @@ dependencies {
 
     // Mod Menu (addon, not bundled)
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+    // Cloth Config (config UI)
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
 }
 
 tasks.processResources {
