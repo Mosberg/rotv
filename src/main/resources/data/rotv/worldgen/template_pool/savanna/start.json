@@ -1,0 +1,14 @@
+{
+  "name": "rotv:savanna/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:savanna_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}

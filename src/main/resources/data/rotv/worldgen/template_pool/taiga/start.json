@@ -1,0 +1,14 @@
+{
+  "name": "rotv:taiga/start",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "location": "rotv:taiga_house_01",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ]
+}
